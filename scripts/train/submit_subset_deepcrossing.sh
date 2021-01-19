@@ -8,7 +8,7 @@ output_dir=$pwdPath/checkpoint
 
 
 function execut {
-/opt/conda/bin/python3 -m src.example.deepcrossing.train \
+/opt/conda/bin/python3 -u -m  src.example.deepcrossing.train \
     --input_dir $input_dir \
     --output_dir $output_dir \
     --epoch 100 \

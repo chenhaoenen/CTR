@@ -8,7 +8,7 @@ output_dir=$pwdPath/checkpoint
 
 
 function execut {
-/opt/conda/bin/python3 -m src.example.afm.train \
+/opt/conda/bin/python3 -u -m  src.example.afm.train \
     --input_dir $input_dir \
     --output_dir $output_dir \
     --epoch 100 \

@@ -120,7 +120,7 @@ class InterestExtractorLayer(nn.Module):
         batch, max_seq_len, input_dim = seq_item.size()
 
         #pack_gru_x: data [sum(seq_len), input_dim] batch_sizes=sorted(seq_len), _, _
-        pack_gru_x = rnn_utils.pack_padded_sequence(seq_item, seq_len, batch_first=True, enforce_sorted=False)
+        pack_gru_x = rnn_utils.pack_padded_sequence(seq_item, seq_len.cpu(), batch_first=True, enforce_sorted=False)
         pack_gru_out, _ = self.gru(pack_gru_x)  #gru_out [sum(seq_len), hidden_dim]
         pad_gru_out, _ = rnn_utils.pad_packed_sequence(pack_gru_out, batch_first=True, padding_value=0.0, total_length=max_seq_len) #pad_gru_out [B, max_seq_len, hidden_dim]
 
@@ -271,7 +271,7 @@ class AIGRU(nn.Module):
 
         #gru
         h0 = torch.zeros(batch, max_seq_len, self.hidden_size, dtype=dtype, device=device)
-        gru_x = rnn_utils.pack_padded_sequence(gru_x, seq_len, batch_first=True, enforce_sorted=False)
+        gru_x = rnn_utils.pack_padded_sequence(gru_x, seq_len.cpu(), batch_first=True, enforce_sorted=False)
         out, _ = self.gru(gru_x, h0)
         out, _ = rnn_utils.pad_packed_sequence(out, batch_first=True, padding_value=0.0, total_length=gru_x.size(1)) #out [B, max_seq_len, hidden_dim]
 
@@ -297,10 +297,10 @@ class DynamicGRU(nn.Module):
         '''
         #data [sum(seq_len), input_dim]
         #batch_sizes sorted(seq_len)
-        pack_data, batch_sizes, _, _ = rnn_utils.pack_padded_sequence(gru_x, seq_len, batch_first=True, enforce_sorted=False)
+        pack_data, batch_sizes, _, _ = rnn_utils.pack_padded_sequence(gru_x, seq_len.cpu(), batch_first=True, enforce_sorted=False)
 
         #sorce [sum(seq_len)]
-        pack_score, _, _, _ = rnn_utils.pack_padded_sequence(att_score, seq_len, batch_first=True, enforce_sorted=False) #out [B, max_seq_len, hidden_dim]
+        pack_score, _, _, _ = rnn_utils.pack_padded_sequence(att_score, seq_len.cpu(), batch_first=True, enforce_sorted=False) #out [B, max_seq_len, hidden_dim]
 
         #gru init
         h0 = torch.zeros(batch_sizes[0], self.hidden_size)
