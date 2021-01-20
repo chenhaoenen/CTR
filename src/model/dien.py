@@ -295,19 +295,23 @@ class DynamicGRU(nn.Module):
         :param seq_len: [B]
         :return:
         '''
+        #define
+        dtype = gru_x.dtype
+        device = gru_x.device
+
         #data [sum(seq_len), input_dim]
         #batch_sizes sorted(seq_len)
-        pack_data, batch_sizes, _, _ = rnn_utils.pack_padded_sequence(gru_x, seq_len.cpu(), batch_first=True, enforce_sorted=False)
+        pack_data, batch_sizes, sorted_indices, unsorted_indices = rnn_utils.pack_padded_sequence(gru_x, seq_len.cpu(), batch_first=True, enforce_sorted=False)
 
         #sorce [sum(seq_len)]
         pack_score, _, _, _ = rnn_utils.pack_padded_sequence(att_score, seq_len.cpu(), batch_first=True, enforce_sorted=False) #out [B, max_seq_len, hidden_dim]
 
         #gru init
-        h0 = torch.zeros(batch_sizes[0], self.hidden_size)
+        h0 = torch.zeros(batch_sizes[0], self.hidden_size, dtype=dtype, device=device)
 
         #output
         #pack_out [sum(seq_len), hidden_dim]
-        pack_out = torch.zeros(pack_data.size(0), self.hidden_size, dtype=pack_data.dtype, device=pack_data.device)
+        data_out = torch.zeros(pack_data.size(0), self.hidden_size, dtype=dtype, device=device)
 
         #times
         begin = 0
@@ -319,9 +323,11 @@ class DynamicGRU(nn.Module):
 
             h_t_plus_1 = self.gru(i_x, s_x, h_x) #[batch, hidden_dim]
 
-            pack_out[begin:begin+batch] = h_t_plus_1
+            data_out[begin:begin+batch] = h_t_plus_1
             ht = h_t_plus_1
             begin += batch
+
+        pack_out = rnn_utils.PackedSequence(data_out, batch_sizes, sorted_indices, unsorted_indices)
 
         out, _ = rnn_utils.pad_packed_sequence(pack_out, batch_first=True, padding_value=0.0, total_length=gru_x.size(1)) #out [B, max_seq_len, hidden_dim]
 
@@ -338,9 +344,9 @@ class AGRU(nn.Module):
         #Ur, Uh
         self.u = nn.Parameter(nn.init.xavier_normal_(torch.empty(2*hidden_dim, hidden_dim)))
         #Br
-        self.br = nn.Parameter(nn.init.xavier_normal_(torch.empty(hidden_dim)))
+        self.br = nn.Parameter(torch.zeros(hidden_dim))
         #Bh
-        self.bh = nn.Parameter(nn.init.xavier_normal_(torch.empty(hidden_dim)))
+        self.bh = nn.Parameter(torch.zeros(hidden_dim))
 
 
     def forward(self, x, score, ht):
@@ -374,11 +380,11 @@ class AUGRU(nn.Module):
         #Uu, Ur, Uh
         self.u = nn.Parameter(nn.init.xavier_normal_(torch.empty(3*hidden_dim, hidden_dim)))
         #Bu
-        self.bu = nn.Parameter(nn.init.xavier_normal_(torch.empty(hidden_dim)))
+        self.bu = nn.Parameter(torch.zeros(hidden_dim))
         #Br
-        self.br = nn.Parameter(nn.init.xavier_normal_(torch.empty(hidden_dim)))
+        self.br = nn.Parameter(torch.zeros(hidden_dim))
         #Bh
-        self.bh = nn.Parameter(nn.init.xavier_normal_(torch.empty(hidden_dim)))
+        self.bh = nn.Parameter(torch.zeros(hidden_dim))
 
     def forward(self, x, score, ht):
         '''
