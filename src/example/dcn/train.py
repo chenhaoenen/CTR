@@ -29,7 +29,7 @@ def parse_arguments():
     parser.add_argument('--deep_layers', nargs='+', type=int, default=[256, 32, 8, 1],  help='The layer hiddens for mlp.')
     parser.add_argument('--embedding_dim', default=8, type=int, help='The dimension of user and item embeddings')
     parser.add_argument('--use_cuda', default=False, action='store_true', help='Whether use gpu')
-    parser.add_argument('--devices', type=str, default='0,1', help='The devices id of gpu')
+    parser.add_argument('--devices', type=str, default='cpu', help='The devices id of gpu')
     parser.add_argument('--learning_rate', default=1.5e-3, type=float, help="The initial learning rate for optimizer")
     parser.add_argument('--eval_freq', default=100, type=int, help='The freq of eval test set')
     parser.add_argument('--log_freq', default=30, type=int, help='The freq of print log')
