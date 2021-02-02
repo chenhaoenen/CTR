@@ -6,7 +6,7 @@
 #--------------------------------------------
 import torch
 from torch import nn
-from src.model.base import EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DeepCrossing(nn.Module):
     '''
@@ -16,7 +16,7 @@ class DeepCrossing(nn.Module):
         super(DeepCrossing, self).__init__()
 
         #shared embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #Residual_Units

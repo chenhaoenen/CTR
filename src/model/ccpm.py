@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from functools import reduce
 from operator import __add__
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class CCPM(nn.Module):
     '''
@@ -24,7 +24,7 @@ class CCPM(nn.Module):
         super(CCPM, self).__init__()
 
         #embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #CNN layer
@@ -109,6 +109,6 @@ class CNNLayer(nn.Module):
         con_out = self.act(self.conv(pad_out)) #[B, out_channels, H, W]
 
         #p-MaxPooling
-        pool_out = torch.topk(con_out, dim=2, k=self.topk)[0] #[B, out_channels, H, W]
+        pool_out = torch.topk(con_out, dim=2, k=self.topk)[0] #[B, out_channels, H, 1]
 
         return pool_out

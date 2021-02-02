@@ -6,7 +6,7 @@
 #--------------------------------------------
 import torch
 from torch import nn
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class PNN(nn.Module):
     '''
@@ -19,7 +19,7 @@ class PNN(nn.Module):
         self.D1 = deep_layers[0]
 
         #embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #Wz

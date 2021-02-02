@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 import torch.nn.utils.rnn as rnn_utils
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DMR(nn.Module):
     '''
@@ -32,16 +32,16 @@ class DMR(nn.Module):
 
         #user embed
         self.user_feat_num = len(user_sparse_and_nums) * uer_embed_dim + len(user_dense)
-        self.user_embed = EmbeddingLayer(feat_and_nums=user_sparse_and_nums, embed_dim=uer_embed_dim)
+        self.user_embed = SparseEmbeddingLayer(feat_and_nums=user_sparse_and_nums, embed_dim=uer_embed_dim)
         self.user_dense = DenseFeatCatLayer()
 
         #item embed
         self.target_item_feat_num = len(item_sparse_and_nums) * target_item_embed_dim + len(item_dense)
-        self.target_item_embed = EmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=target_item_embed_dim)
+        self.target_item_embed = SparseEmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=target_item_embed_dim)
         self.target_item_dense = DenseFeatCatLayer()
         if not self.is_share_embed:
             self.seq_item_feat_num = len(item_sparse_and_nums) * seq_item_embed_dim + len(item_dense)
-            self.seq_item_embed = EmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=seq_item_embed_dim)
+            self.seq_item_embed = SparseEmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=seq_item_embed_dim)
             self.seq_item_dense = DenseFeatCatLayer()
         else:
             assert seq_item_embed_dim == target_item_embed_dim, 'if shared embedding, seq_item_embed_dim num be equal target_item_embed_dim'

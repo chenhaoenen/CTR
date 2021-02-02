@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 import torch.nn.utils.rnn as rnn_utils
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DIEN(nn.Module):
     '''
@@ -29,9 +29,9 @@ class DIEN(nn.Module):
         self.item_feat_num = len(item_sparse_and_nums)*embed_dim + len(item_dense)
 
         #embed
-        self.user_embed = EmbeddingLayer(feat_and_nums=user_sparse_and_nums, embed_dim=embed_dim)
+        self.user_embed = SparseEmbeddingLayer(feat_and_nums=user_sparse_and_nums, embed_dim=embed_dim)
         self.user_dense = DenseFeatCatLayer()
-        self.item_embed = EmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=embed_dim)
+        self.item_embed = SparseEmbeddingLayer(feat_and_nums=item_sparse_and_nums, embed_dim=embed_dim)
         self.item_dense = DenseFeatCatLayer()
 
         #InterestExtractorLayer

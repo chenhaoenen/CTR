@@ -7,7 +7,7 @@
 import torch
 from torch import nn
 from src.model.fm import FMInteraction
-from src.model.base import DNN, Linear, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, Linear, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DeepFM(nn.Module):
     '''
@@ -17,7 +17,7 @@ class DeepFM(nn.Module):
         super(DeepFM, self).__init__()
 
         #shared embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #fm interaction

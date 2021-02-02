@@ -68,7 +68,6 @@ class Linear(nn.Module):
 
         return out #[B]
 
-
 class DNN(nn.Module):
     def __init__(self, input_dim, layers, act='relu', drop=0.5, bn=False):
         super(DNN, self).__init__()
@@ -108,9 +107,9 @@ class DNN(nn.Module):
 
         return out
 
-class EmbeddingLayer(nn.Module):
+class SparseEmbeddingLayer(nn.Module):
     def __init__(self, feat_and_nums:List[Tuple[str, int]], embed_dim):
-        super(EmbeddingLayer, self).__init__()
+        super(SparseEmbeddingLayer, self).__init__()
 
         self.embed = nn.ModuleDict(
             {
@@ -124,16 +123,16 @@ class EmbeddingLayer(nn.Module):
         for key, layer in self.embed.items():
             weight_init(layer)
 
-    def forward(self, feat:Dict[str, Tensor], axis=2):
+    def forward(self, feats:Dict[str, Tensor], axis=2):
         '''
-        :param feat: dict[feat_name: Tensor], Tensor[B]
-        :return: #[[B, 1, embed_dim], [B, 1, embed_dim], ...,[B, 1, embed_dim]]
+        :param feats: dict[feat_name: Tensor], Tensor[B]
+        :return:
         '''
 
         if axis == 1:
             embed_out = [
                 self.embed[feat](x.long()).unsqueeze(1)
-                for feat, x in feat.items()
+                for feat, x in feats.items()
             ]  # [[B, 1, embed_dim], [B, 1, embed_dim], ...,[B, 1, embed_dim]]
 
             return torch.cat(embed_out, dim=1) #[B, feat_num, embed_dim]
@@ -141,7 +140,7 @@ class EmbeddingLayer(nn.Module):
         elif axis == 2:
             embed_out = [
                 self.embed[feat](x.long())
-                for feat, x in feat.items()
+                for feat, x in feats.items()
             ]  # [[B, embed_dim], [B, embed_dim], ...,[B, embed_dim]]
 
             return torch.cat(embed_out, dim=-1) #[B, feat_num*embed_dim]
@@ -149,7 +148,7 @@ class EmbeddingLayer(nn.Module):
         else:
             embed_out = [
                 self.embed[feat](x.long()).unsqueeze(1)
-                for feat, x in feat.items()
+                for feat, x in feats.items()
             ]  # [[B, 1, embed_dim], [B, 1, embed_dim], ...,[B, 1, embed_dim]]
 
             dim1_out = torch.cat(embed_out, dim=1) #[B, feat_num, embed_dim]
@@ -172,3 +171,53 @@ class DenseFeatCatLayer(nn.Module):
         out = torch.cat(u_dense_x, dim=1) #[B, user_dense]
 
         return out
+
+class DenseEmbeddingLayer(nn.Module):
+    def __init__(self, dense_feat:List, embed_dim):
+        super(DenseEmbeddingLayer, self).__init__()
+
+        self.embed = nn.ModuleDict(
+            {
+                feat: nn.Embedding(1, embed_dim)
+                for feat in dense_feat
+            }
+        )
+        self.init_weights()
+
+    def init_weights(self):
+        for key, layer in self.embed.items():
+            weight_init(layer)
+
+    def forward(self, feats:Dict[str, Tensor], axis=2):
+        '''
+        :param feats: dict[feat_name: Tensor], Tensor:[B]
+        :return:
+        '''
+        device = list(feats.values())[0].device
+        idx0 = torch.tensor([0]).long().to(device)
+        if axis == 1:
+            embed_out = [
+                (x.unsqueeze(1).float() * self.embed[feat](idx0)).unsqueeze(1)
+                for feat, x in feats.items()
+            ]  # [[B, 1, embed_dim], [B, 1, embed_dim], ...,[B, 1, embed_dim]]
+
+            return torch.cat(embed_out, dim=1) #[B, feat_num, embed_dim]
+
+        elif axis == 2:
+            embed_out = [
+                (x.unsqueeze(1).float() * self.embed[feat](idx0)).unsqueeze(1)
+                for feat, x in feats.items()
+            ]  # [[B, embed_dim], [B, embed_dim], ...,[B, embed_dim]]
+
+            return torch.cat(embed_out, dim=-1) #[B, feat_num*embed_dim]
+
+        else:
+            embed_out = [
+                (x.unsqueeze(1).float() * self.embed[feat](idx0)).unsqueeze(1)
+                for feat, x in feats.items()
+            ]  # [[B, 1, embed_dim], [B, 1, embed_dim], ...,[B, 1, embed_dim]]
+
+            dim1_out = torch.cat(embed_out, dim=1) #[B, feat_num, embed_dim]
+            dim2_out = torch.cat(embed_out, dim=-1).squeeze(1) #[B, feat_num*embed_dim]
+
+            return dim1_out, dim2_out

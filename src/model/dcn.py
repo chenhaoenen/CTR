@@ -6,7 +6,7 @@
 #--------------------------------------------
 import torch
 from torch import nn
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DCN(nn.Module):
     """
@@ -17,7 +17,7 @@ class DCN(nn.Module):
         x0_dim = len(sparse_feat_and_nums) * embed_dim + len(dense_feat)
 
         #embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #cross

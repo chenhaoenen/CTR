@@ -6,7 +6,7 @@
 #--------------------------------------------
 import torch
 from torch import nn
-from src.model.base import Linear, DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import Linear, DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class WideDeep(nn.Module):
     '''
@@ -20,7 +20,7 @@ class WideDeep(nn.Module):
         self.wide = Linear(sparse_feat_and_nums=sparse_cross_feat_and_nums, dense_feat=dense_feat)
 
         #deep
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
         assert deep_layers[-1] == 1, "last hidden dim must be 1"
         deep_dim = len(sparse_cross_feat_and_nums) * embed_dim + len(dense_feat)

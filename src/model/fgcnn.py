@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from functools import reduce
 from operator import __add__
-from src.model.base import DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class FGCNN(nn.Module):
     def __init__(self, sparse_feat_and_nums,
@@ -31,7 +31,7 @@ class FGCNN(nn.Module):
                'convolution layers kernel size, convolution channels size, pool layers kernel size, recommend layers feat maps must equal'
 
         #Feature Generation embed
-        self.fg_embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.fg_embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.fg_dense = DenseFeatCatLayer()
 
         #Deep Classifier embed
@@ -39,7 +39,7 @@ class FGCNN(nn.Module):
             self.dc_embed = self.fg_embed
             # self.dc_dense = self.fg_dense
         else:
-            self.dc_embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+            self.dc_embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
             # self.dc_dense = DenseFeatCatLayer()
 
         #Feature Generation

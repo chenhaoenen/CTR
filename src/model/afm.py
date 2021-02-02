@@ -7,7 +7,7 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from src.model.base import Linear, EmbeddingLayer
+from src.model.base import Linear, SparseEmbeddingLayer
 
 class AFM(nn.Module):
     '''
@@ -17,7 +17,7 @@ class AFM(nn.Module):
         super(AFM, self).__init__()
 
         #embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         # linear
         self.linear = Linear(sparse_feat_and_nums=sparse_feat_and_nums, dense_feat=dense_feat)
 

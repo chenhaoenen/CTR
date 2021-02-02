@@ -6,7 +6,7 @@
 #--------------------------------------------
 import torch
 from torch import nn
-from src.model.base import Linear, DNN, EmbeddingLayer, DenseFeatCatLayer
+from src.model.base import Linear, DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class NFM(nn.Module):
     '''
@@ -19,7 +19,7 @@ class NFM(nn.Module):
         self.linear = Linear(sparse_feat_and_nums=sparse_feat_and_nums, dense_feat=dense_feat)
 
         #embed
-        self.embed = EmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
+        self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
         self.dense = DenseFeatCatLayer()
 
         #Bi-Interaction pooling
