@@ -49,7 +49,7 @@ class AFN(nn.Module):
 
         #afn
         afn_embed_out = self.afn_embed(sparse_feat, dense_feat) #[B, feat_num, embed_dim]
-        afn_embed_out = self.drop_out1(afn_embed_out) #[B, feat_num, embed_dim]
+        # afn_embed_out = self.drop_out1(afn_embed_out) #[B, feat_num, embed_dim]
 
         afn_ltl_out = self.afn_ltl(afn_embed_out)  #[B, num_log_neurons*embed_dim]
         afn_ltl_out = self.afn_bn1(self.drop_out2(afn_ltl_out)) #[B, num_log_neurons*embed_dim]
@@ -79,9 +79,11 @@ class Embedding(nn.Module):
 
     def init_weight(self): #keep all the values in the embeddings to be positive
         for key, layer in self.sparse_embed.embed:
-            layer.weight.data.uniform_(0.001, 0.01)
+            # layer.weight.data.uniform_(0.001, 0.01)
+            layer.weight.data.uniform_(0.8, 0.9)
         for key, layer in self.dense_embed.embed:
-            layer.weight.data.uniform_(0.001, 0.01)
+            # layer.weight.data.uniform_(0.001, 0.01)
+            layer.weight.data.uniform_(0.8, 0.9)
 
     def forward(self, sparse_feat, dense_feat):
         '''
@@ -112,6 +114,7 @@ class LogarithmicTransformerLayer(nn.Module):
         batch = x.size(0)
         x = x.permute(0 ,2, 1) #[B, embed_dim, feat_num]
         log_out = torch.log(x) #[B, embed_dim, feat_num]
+        print(log_out, 'log_out'*5)
         exp_x = F.linear(log_out, self.w, bias=self.b) #[B, embed_dim, num_log_neurons]
         exp_out = torch.exp(exp_x) #[B, embed_dim, num_log_neurons]
         out = exp_out.view(batch, -1) #[B, num_log_neurons*embed_dim]
