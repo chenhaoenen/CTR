@@ -8,16 +8,16 @@ output_dir=$pwdPath/checkpoint
 
 
 function execut {
-/opt/conda/bin/python3 -u -m  src.example.interhat.train \
+/opt/conda/bin/python3 -u -m  src.example.autoint.train \
     --input_dir $input_dir \
     --output_dir $output_dir \
     --epoch 100 \
     --batch_size 128 \
-    --embedding_dim 128 \
+    --embedding_dim 32 \
     --devices '0,1' \
     --use_cuda \
-    --eval_freq 2000 \
-    --log_freq 100 | tee $pwdPath/log/$(date -d "today" +"%Y%m%d-%H%M%S")_interhat.log
+    --eval_freq 5000 \
+    --log_freq 100 | tee $pwdPath/log/$(date -d "today" +"%Y%m%d-%H%M%S")_autoint.log
 }
 
 starttime=`date +'%Y-%m-%d %H:%M:%S'`

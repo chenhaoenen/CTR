@@ -13,7 +13,6 @@ from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 class DIEN(nn.Module):
     '''
     Deep Interest Evolution Network for Click-Through Rate Prediction
-    Reference: https://github.com/shenweichen/DeepCTR-Torch/blob/master/deepctr_torch/models/dien.py
     '''
     def __init__(self, user_sparse_and_nums,
                  user_dense,

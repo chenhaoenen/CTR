@@ -7,10 +7,13 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from src.model.transformer import Transformer
+from src.model.transformer import TransformerBase
 from src.model.base import DNN, SparseEmbeddingLayer, DenseEmbeddingLayer
 
 class InterHAt(nn.Module):
+    '''
+    Interpretable Click-Through Rate Prediction through Hierarchical Attention
+    '''
     def __init__(self,
                  sparse_feat_and_nums,
                  dense_feat,
@@ -27,9 +30,9 @@ class InterHAt(nn.Module):
         self.dense_embed = DenseEmbeddingLayer(dense_feat=dense_feat, embed_dim=embed_dim)
 
         #transformer
-        self.transformer = Transformer(input_size=embed_dim,
-                                       hidden_size=hidden_size,
-                                       num_attention_heads=num_attention_heads)
+        self.transformer = TransformerBase(input_size=embed_dim,
+                                           hidden_size=hidden_size,
+                                           num_attention_heads=num_attention_heads)
 
         #Hierarchical Attention
         self.hier_att = HierarchicalAttention(embed_dim, context_dim, k_layers)

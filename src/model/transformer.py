@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-      
 #--------------------------------------------
 # Author:chenhao
-# Date:2021-02-04 11:09
+# Date:2020-09-09 11:09
 # Description:  
 #--------------------------------------------
 import torch
@@ -9,12 +9,12 @@ import math
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Transformer(nn.Module):
-    def __init__(self, input_size, hidden_size, num_attention_heads, dropout=0.5, act='relu'):
-        super(Transformer, self).__init__()
+class TransformerBase(nn.Module):
+    def __init__(self, input_size, hidden_size, num_attention_heads, dropout=0.5, act='relu', resnet=False):
+        super(TransformerBase, self).__init__()
 
         self.self = TransformerSelfAttention(input_size, hidden_size, num_attention_heads, dropout=dropout)
-        self.output = TransformerSelfOutput(input_size, hidden_size, dropout=dropout, act=act)
+        self.output = TransformerSelfOutput(input_size, hidden_size, dropout=dropout, act=act, resnet=resnet)
 
     def forward(self, x):
         '''
@@ -22,7 +22,7 @@ class Transformer(nn.Module):
         :return:
         '''
         attention_out = self.self(x) #[B, feat_num, hidden_size]
-        output_out = self.output(attention_out) #[B, feat_num, input_size]
+        output_out = self.output(x, attention_out) #[B, feat_num, input_size]
 
         return output_out
 
@@ -92,20 +92,24 @@ class TransformerSelfAttention(nn.Module):
         return x
 
 class TransformerSelfOutput(nn.Module):
-    def __init__(self, input_size, hidden_size, dropout, act):
+    def __init__(self, input_size, hidden_size, dropout, act, resnet):
         super(TransformerSelfOutput, self).__init__()
         self.dense = nn.Linear(hidden_size, input_size)
         self.dropout = nn.Dropout(dropout)
+        self.resnet = resnet
         if act == 'relu':
             self.act = nn.ReLU()
         else:
             self.act = nn.GELU()
-    def forward(self, x):
+    def forward(self, x, attention_out):
         '''
-        :param x: [B， feat_num, hidden_size]
+        :param x: [B， feat_num, input_size]
+        :param attention_out: [B， feat_num, hidden_size]
         :return:
         '''
-        hidden_states = self.dense(x) #[B, feat_num, input_size]
+        hidden_states = self.dense(attention_out) #[B, feat_num, input_size]
+        if self.resnet:
+            hidden_states = x + hidden_states
         hidden_states = self.act(hidden_states)
         hidden_states = self.dropout(hidden_states)
 
