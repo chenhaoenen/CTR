@@ -9,6 +9,9 @@ from torch import nn
 from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
 
 class DCNV2(nn.Module):
+    '''
+    DCN V2: Improved Deep & Cross Network and Practical Lessons forWeb-scale Learning to Rank Systems
+    '''
     def __init__(self, sparse_feat_and_nums, cross_layers, dense_feat, embed_dim, deep_layers, k_Experts, r_dim, sigmoid_out=False):
         super(DCNV2, self).__init__()
         x0_dim = len(sparse_feat_and_nums) * embed_dim + len(dense_feat)
