@@ -42,7 +42,7 @@ class Linear(nn.Module):
         for key, layer in self.dense_weight.items():
             weight_init(layer)
 
-    def forward(self, sparse_feat:Dict[str, Tensor], dense_deat:Dict[str, Tensor]=None):
+    def forward(self, sparse_feat:Dict[str, Tensor], dense_feat:Dict[str, Tensor]=None):
         """
         :param sparse_feat: [B]
         :param dense_deat: [B]
@@ -56,7 +56,7 @@ class Linear(nn.Module):
 
         dense_x = [
             x.unsqueeze(1).float() * self.dense_weight[feat](torch.Tensor([0]).to(x.device).long())
-            for feat, x in dense_deat.items()
+            for feat, x in dense_feat.items()
         ] #[[B, 1], [B, 1], ...]
         dense_x = torch.cat(dense_x, dim=-1) #[B, dense_num*1]
 
