@@ -11,7 +11,7 @@ from typing import List, Dict, Tuple
 from src.model.fm import FMInteraction
 from torch.nn.functional import softmax
 from src.model.utils import weight_init
-from src.model.base import DNN, SparseEmbeddingLayer, DenseFeatCatLayer
+from src.model.base import DNN, SparseEmbeddingLayer
 
 class IFM(nn.Module):
     '''
@@ -22,16 +22,15 @@ class IFM(nn.Module):
 
         #embed
         self.embed = SparseEmbeddingLayer(feat_and_nums=sparse_feat_and_nums, embed_dim=embed_dim)
-        self.dense = DenseFeatCatLayer()
 
         #Factor Estimating Network
         self.fen = FEN(len(sparse_feat_and_nums)*embed_dim, fen_layers=fen_layers, sparse_num=len(sparse_feat_and_nums))
 
-        #FMInteraction
-        self.fm = FMInteraction()
+        #FMInteraction vector
+        self.fm_vector = FMInteraction()
 
-        #linear
-        self.linear = IFMLinear(sparse_feat_and_nums=sparse_feat_and_nums, dense_feat=dense_feat, bias=False)
+        #FMInteraction linear
+        self.fm_linear = IFMLinear(sparse_feat_and_nums=sparse_feat_and_nums, dense_feat=dense_feat, bias=False)
         self.bias = nn.Parameter(torch.zeros(1))
 
         self.sigmoid_out = sigmoid_out
@@ -47,17 +46,16 @@ class IFM(nn.Module):
         # sparse_fm_embed_x [B, sparse_num, embed_dim]
         # sparse_fen_embed_x [B, sparse_num*embed_dim]
         sparse_fm_embed_x, sparse_fen_embed_x = self.embed(sparse_feat, axis=-1)
-        dense_deep_x = self.dense(dense_feat) #[B, dense_num]
 
         # Factor Estimating Network
         mx = self.fen(sparse_fen_embed_x) #[B, sparse_num]
 
-        #FMInteraction
+        #FMInteraction vector and reweighting layer
         sparse_fm_embed_x = mx.unsqueeze(2) * sparse_fm_embed_x #[B, sparse_num, embed_dim]
-        fm_out = self.fm(sparse_fm_embed_x) #[B]
+        fm_out = self.fm_vector(sparse_fm_embed_x) #[B]
 
-        # linear
-        linear_out = self.linear(sparse_feat, mx, dense_feat)
+        #FMInteraction linear and reweighting layer
+        linear_out = self.fm_linear(sparse_feat, mx, dense_feat)
 
         #out
         out = linear_out + fm_out + self.bias
@@ -67,6 +65,9 @@ class IFM(nn.Module):
         return out
 
 class FEN(nn.Module):
+    '''
+    Factor Estimating Network
+    '''
     def __init__(self, input_dim, fen_layers, sparse_num):
         super(FEN, self).__init__()
 
@@ -131,7 +132,7 @@ class IFMLinear(nn.Module):
         ] #[[B, 1], [B, 1], ...]
         sparse_x = torch.cat(sparse_x, dim=-1) #[B, sparse_num*1]
 
-        #ifm weight
+        #ifm reweighting layer
         sparse_x = sparse_x * mx #[B, sparse_num]
 
         dense_x = [
