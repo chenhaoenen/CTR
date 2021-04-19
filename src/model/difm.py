@@ -42,7 +42,6 @@ class DIFM(nn.Module):
         self.fm_linear = IFMLinear(sparse_feat_and_nums=sparse_feat_and_nums, dense_feat=dense_feat, bias=False)
         self.bias = nn.Parameter(torch.zeros(1))
 
-
         #output
         self.sigmoid_out = sigmoid_out
         if self.sigmoid_out:
@@ -127,7 +126,6 @@ class BitWise(nn.Module):
         '''
         param Ibit : [B, sparse_num*embed_dim]
         '''
-
         Obit = self.linear(Ibit) #[B, fen_layers[-1]]
 
         return Obit
